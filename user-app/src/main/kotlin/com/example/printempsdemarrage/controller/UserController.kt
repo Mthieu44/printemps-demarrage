@@ -1,10 +1,7 @@
 package com.example.printempsdemarrage.controller
 
-import bzh.zomzog.prez.springkotlin.errors.UserNotFoundError
-import bzh.zomzog.prez.springkotlin.controller.dto.UserDTO
-import bzh.zomzog.prez.springkotlin.controller.dto.asUserDTO
-import bzh.zomzog.prez.springkotlin.repository.UserRepository
-import com.example.printempsdemarrage.repository.UserRepository
+import com.example.printempsdemarrage.dto.UserDTO
+import com.example.printempsdemarrage.jpa.UserDatabaseRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
@@ -23,26 +20,22 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @Validated
-class UserController(val userRepository: UserRepository) {
+class UserController(val userRepository: UserDatabaseRepository) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Operation(summary = "Create user")
     @ApiResponses(value = [
-        ApiResponse(responseCode = "201", description = "User created",
+        ApiResponse(responseCode = "200", description = "User created",
             content = [Content(mediaType = "application/json",
                 schema = Schema(implementation = UserDTO::class)
             )]),
         ApiResponse(responseCode = "409", description = "User already exist",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @PostMapping("/api/users")
-    fun create(@RequestBody @Valid user: UserDTO): ResponseEntity<UserDTO> =
-        userRepository.create(user.asUser()).fold(
-            { success ->
-                logger.info("=====> info")
-                ResponseEntity.status(HttpStatus.CREATED).body(success.asUserDTO()) },
-            { failure ->
-                logger.info("=====> info")
-                ResponseEntity.status(HttpStatus.CONFLICT).build() })
+    fun create(@RequestBody @Valid user: UserDTO): ResponseEntity<UserDTO> {
+        return ResponseEntity.ok(userRepository.addUser(user))
+    }
+
 
     @Operation(summary = "List users")
     @ApiResponses(value = [
@@ -52,13 +45,10 @@ class UserController(val userRepository: UserRepository) {
                     schema = Schema(implementation = UserDTO::class))
             )])])
     @GetMapping("/api/users")
-    fun list(@RequestParam(required = false) @Min(15) age: Int?) =
-        userRepository.list(age)
-            .map { it.asUserDTO() }
-            .let {
-                logger.info("=====> info")
-                ResponseEntity.ok(it)
-            }
+    fun getAll(): ResponseEntity<List<UserDTO>> {
+        return ResponseEntity.ok(userRepository.getUsers())
+    }
+
 
     @Operation(summary = "Get user by email")
     @ApiResponses(value = [
@@ -70,13 +60,7 @@ class UserController(val userRepository: UserRepository) {
     ])
     @GetMapping("/api/users/{email}")
     fun findOne(@PathVariable @Email email: String): ResponseEntity<UserDTO> {
-        val user = userRepository.get(email)
-        logger.info("=====> info")
-        return if (user != null) {
-            ResponseEntity.ok(user.asUserDTO())
-        } else {
-            throw UserNotFoundError(email)
-        }
+        return ResponseEntity.ok(userRepository.getUser(email))
     }
 
     @Operation(summary = "Update a user by email")
@@ -87,32 +71,19 @@ class UserController(val userRepository: UserRepository) {
         ApiResponse(responseCode = "400", description = "Invalid request",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @PutMapping("/api/users/{email}")
-    fun update(@PathVariable @Email email: String, @RequestBody @Valid user: UserDTO): ResponseEntity<Any> =
-        if (email != user.email) {
-            logger.info("=====> info")
-            ResponseEntity.badRequest().body("Invalid email")
-        } else {
-            logger.info("=====> info")
-            userRepository.update(user.asUser()).fold(
-                { success -> ResponseEntity.ok(success.asUserDTO()) },
-                { failure -> ResponseEntity.badRequest().body(failure.message) }
-            )
-        }
+    fun update(@PathVariable @Email email: String, @RequestBody @Valid user: UserDTO): ResponseEntity<Any> {
+        return ResponseEntity.ok(userRepository.updateUser(email, user))
+    }
 
     @Operation(summary = "Delete user by email")
     @ApiResponses(value = [
-        ApiResponse(responseCode = "204", description = "User deleted"),
-        ApiResponse(responseCode = "400", description = "User not found",
+        ApiResponse(responseCode = "200", description = "User deleted"),
+        ApiResponse(responseCode = "404", description = "User not found",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])
     ])
     @DeleteMapping("/api/users/{email}")
     fun delete(@PathVariable @Email email: String): ResponseEntity<Any> {
-        val deleted = userRepository.delete(email)
-        logger.info("=====> info")
-        return if (deleted == null) {
-            ResponseEntity.badRequest().body("User not found")
-        } else {
-            ResponseEntity.noContent().build()
-        }
+        userRepository.deleteUser(email)
+        return ResponseEntity.ok().build()
     }
 }
