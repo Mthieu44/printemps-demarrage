@@ -4,6 +4,7 @@ import bzh.zomzog.prez.springkotlin.errors.UserNotFoundError
 import bzh.zomzog.prez.springkotlin.controller.dto.UserDTO
 import bzh.zomzog.prez.springkotlin.controller.dto.asUserDTO
 import bzh.zomzog.prez.springkotlin.repository.UserRepository
+import com.example.printempsdemarrage.repository.UserRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content

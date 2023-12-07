@@ -1,6 +1,5 @@
 package com.example.printempsdemarrage.repository
 
-import bzh.zomzog.prez.springkotlin.controller.UserDTO
 import com.example.printempsdemarrage.dto.UserDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
@@ -19,11 +18,7 @@ class UserInMemoryRepository : UserRepository {
         }
     }
 
-    override fun list(age: Int?) = if (age == null) {
-        map.values.toList()
-    } else {
-        map.values.filter { it.age == age }
-    }
+    override fun list() = map.values.toList()
 
     override fun get(email: String) = map[email]
 

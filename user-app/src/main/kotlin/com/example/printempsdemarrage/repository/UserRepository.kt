@@ -5,7 +5,7 @@ import com.example.printempsdemarrage.dto.UserDTO
 
 interface UserRepository {
     fun create(user: UserDTO): Result<UserDTO>
-    fun list(age: Int? = null): List<UserDTO>
+    fun list(): List<UserDTO>
     fun get(email: String): UserDTO?
     fun update(user: UserDTO): Result<UserDTO>
     fun delete(email: String): UserDTO?
