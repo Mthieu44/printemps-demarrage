@@ -18,5 +18,5 @@ data class ArticleDTO (
         val price: Double = 0.0,
         val quantity: Int = 0,
         val lastUpdate: Date = Date(),
-        val panier: PanierDTO
+        /*val panier: PanierDTO*/
 )
