@@ -2,11 +2,13 @@ package com.example.printempsdemarrage.controller
 
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -34,4 +36,22 @@ class ArticleController(val articleRepository: ArticleRepository) {
                     { failure ->
                         ResponseEntity.status(HttpStatus.CONFLICT).build() })
 
+
+
+
+
+    @Operation(summary = "List articles")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "List articles",
+                content = [Content(mediaType = "application/json",
+                        array = ArraySchema(
+                                schema = Schema(implementation = ArticleDTO::class))
+                )])])
+    @GetMapping("/api/articles")
+    fun list(@RequestParam(required = false) @Min(15) age: Int?) =
+            articleRepository.list(age)
+                    .map { it.asArticleDTO() }
+                    .let {
+                        ResponseEntity.ok(it)
+                    }
 }
