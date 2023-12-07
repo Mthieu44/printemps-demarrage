@@ -30,6 +30,7 @@ class ArticleDatabaseRepository(private val jpaRepo: JpaRepo) {
         return jpaRepo.save(article)
     }
 
+
     fun deleteArticle(id: String) {
         if (!jpaRepo.existsById(id)) {
             throw ArticleNotFoundException("User with email $id does not exist")

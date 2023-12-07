@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 @Validated
@@ -82,5 +83,19 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     fun delete(@PathVariable id: String): ResponseEntity<Any> {
         articleRepository.deleteArticle(id)
         return ResponseEntity.ok().build()
+    }
+
+    @Operation(summary = "Set stock article by id")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Article stock updated",
+            content = [Content(mediaType = "application/json",
+                schema = Schema(implementation = ArticleDTO::class))]),
+        ApiResponse(responseCode = "400", description = "Invalid request",
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+    @PutMapping("/api/articles/{id}/stock/{quantity}")
+    fun updateStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
+        val article = articleRepository.getArticle(id)
+        val art = ArticleDTO(article.id, article.name, article.price, quantity, Date())
+        return ResponseEntity.ok(articleRepository.updateArticle(id, art))
     }
 }
