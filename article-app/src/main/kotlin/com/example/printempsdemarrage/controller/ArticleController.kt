@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
-import jakarta.validation.constraints.Email
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -48,7 +47,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     }
 
 
-    @Operation(summary = "Get article by email")
+    @Operation(summary = "Get article by id")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "The article",
             content = [
@@ -61,7 +60,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
         return ResponseEntity.ok(articleRepository.getArticle(id))
     }
 
-    @Operation(summary = "Update a article by email")
+    @Operation(summary = "Update a article by id")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Article updated",
             content = [Content(mediaType = "application/json",
@@ -73,7 +72,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
         return ResponseEntity.ok(articleRepository.updateArticle(id, article))
     }
 
-    @Operation(summary = "Delete article by email")
+    @Operation(summary = "Delete article by id")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Article deleted"),
         ApiResponse(responseCode = "404", description = "Article not found",

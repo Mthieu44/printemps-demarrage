@@ -1,7 +1,7 @@
 package com.example.printempsdemarrage.controller
 
-import com.example.printempsdemarrage.exception.UserAlreadyExistsException
-import com.example.printempsdemarrage.exception.UserNotFoundException
+import com.example.printempsdemarrage.exception.ArticleAlreadyExistsException
+import com.example.printempsdemarrage.exception.ArticleNotFoundException
 import jakarta.validation.ConstraintViolationException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
@@ -31,20 +31,20 @@ class HttpErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.badRequest().body("cc je suis erreur constraint violation exception")
     }
 
-    @ExceptionHandler(UserNotFoundException::class)
+    @ExceptionHandler(ArticleNotFoundException::class)
     fun handleUserNotFoundException(
-            ex: UserNotFoundException,
+            ex: ArticleNotFoundException,
             request: WebRequest
     ): ResponseEntity<Any> {
         return ResponseEntity.notFound().build()
     }
 
-    @ExceptionHandler(UserAlreadyExistsException::class)
+    @ExceptionHandler(ArticleAlreadyExistsException::class)
     fun handleUserAlreadyExistsException(
-            ex: UserAlreadyExistsException,
+            ex: ArticleAlreadyExistsException,
             request: WebRequest
     ): ResponseEntity<Any> {
-        return ResponseEntity.status(409).body("cc je suis erreur user already exists exception")
+        return ResponseEntity.status(409).body("cc je suis erreur article already exists exception")
     }
 
 }
