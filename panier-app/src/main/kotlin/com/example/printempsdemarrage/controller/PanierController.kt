@@ -161,4 +161,31 @@ class PanierController(val panierRepository: PanierRepoInterface) {
         logger.info("Removing article with ID ${article.id} from panier with ID $id.")
         return ResponseEntity.ok(panierRepository.removeFromPanier(id, article))
     }
+
+    @Operation(summary = "Validate panier")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Panier validated",
+            content = [Content(mediaType = "application/json",
+                schema = Schema(implementation = PanierDTO::class))]),
+        ApiResponse(responseCode = "404", description = "Panier not found",
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+    @Tag(name = "Métier")
+    @GetMapping("/api/paniers/{id}/validate")
+    fun validate(@PathVariable id: String): ResponseEntity<PanierDTO> {
+        logger.info("Validating panier with ID $id.")
+        val panier = panierRepository.getPanier(id)
+        val userResponse = RestTemplate().getForEntity("$userControllerUrl/${panier?.userEmail}", String::class.java)
+        if (userResponse.statusCode.isError) {
+            logger.error("User with Email ${panier?.userEmail} not found.")
+            throw HttpClientErrorException(userResponse.statusCode)
+        }
+        val user = userResponse.body
+        try {
+            RestTemplate().put("http://localhost:8080/api/users/${panier?.userEmail}", user)
+        } catch (e: Exception) {
+            logger.error("Error updating user: ${e.message}")
+            return ResponseEntity.status(400).body("Error updating user: ${e.message}")
+        }
+        return ResponseEntity.ok(panier)
+    }
 }
