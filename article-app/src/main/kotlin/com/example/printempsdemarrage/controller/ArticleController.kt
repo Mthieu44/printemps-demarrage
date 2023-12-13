@@ -34,6 +34,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Administration")
     @PostMapping("/api/articles")
     fun create(@RequestBody @Valid article: ArticleDTO): ResponseEntity<ArticleDTO> {
+        logger.info("Création de l'article $article")
         return ResponseEntity.ok(articleRepository.addArticle(article))
     }
 
@@ -48,6 +49,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Administration")
     @GetMapping("/api/articles")
     fun getAll(): ResponseEntity<List<ArticleDTO>> {
+        logger.info("Mostrar todos los artículos")
         return ResponseEntity.ok(articleRepository.getArticles())
     }
 
@@ -63,6 +65,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Administration")
     @GetMapping("/api/articles/{id}")
     fun findOne(@PathVariable id: String): ResponseEntity<ArticleDTO> {
+        logger.info("Affichage de l'article d'ID : $id")
         return ResponseEntity.ok(articleRepository.getArticle(id))
     }
 
@@ -78,6 +81,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Administration")
     @PutMapping("/api/articles/{id}")
     fun update(@PathVariable id: String, @RequestBody @Valid article: ArticleDTO): ResponseEntity<Any> {
+        logger.info("Mise à jour de l'article d'ID : $id par l'aricle : $article")
         return ResponseEntity.ok(articleRepository.updateArticle(id, article))
     }
 
@@ -90,6 +94,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Administration")
     @DeleteMapping("/api/articles/{id}")
     fun delete(@PathVariable id: String): ResponseEntity<Any> {
+        logger.info("Suppression de l'article d'ID : $id")
         articleRepository.deleteArticle(id)
         return ResponseEntity.ok().build()
     }
@@ -106,6 +111,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Métier")
     @PutMapping("/api/articles/{id}/stock/remove/{quantity}")
     fun removeStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
+        logger.info("Suppression d'une quantité de $quantity au stock de l'article d'ID : $id")
         val article = articleRepository.getArticle(id)
         val art = ArticleDTO(article.id, article.name, article.price, article.quantity - quantity, article.lastUpdate)
         return ResponseEntity.ok(articleRepository.updateArticle(id, art))
@@ -123,6 +129,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @Tag(name = "Métier")
     @PutMapping("/api/articles/{id}/stock/add/{quantity}")
     fun addStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
+        logger.info("Ajout d'une quantité de $quantity au stock de l'article d'ID : $id")
         val article = articleRepository.getArticle(id)
         val art = ArticleDTO(article.id, article.name, article.price, article.quantity + quantity, article.lastUpdate)
         return ResponseEntity.ok(articleRepository.updateArticle(id, art))

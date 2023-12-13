@@ -33,6 +33,7 @@ class UserController(val userRepository: UserDatabaseRepository) {
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @PostMapping("/api/users")
     fun create(@RequestBody @Valid user: UserDTO): ResponseEntity<UserDTO> {
+        logger.info("Création du User : $user")
         return ResponseEntity.ok(userRepository.addUser(user))
     }
 
@@ -46,6 +47,7 @@ class UserController(val userRepository: UserDatabaseRepository) {
             )])])
     @GetMapping("/api/users")
     fun getAll(): ResponseEntity<List<UserDTO>> {
+        logger.info("Affichage de tous les User")
         return ResponseEntity.ok(userRepository.getUsers())
     }
 
@@ -60,7 +62,7 @@ class UserController(val userRepository: UserDatabaseRepository) {
     ])
     @GetMapping("/api/users/{email}")
     fun findOne(@PathVariable @Email email: String): ResponseEntity<UserDTO> {
-
+        logger.info("Mostrar usuario con correo electrónico $email")
         return ResponseEntity.ok(userRepository.getUser(email))
     }
 
@@ -73,6 +75,7 @@ class UserController(val userRepository: UserDatabaseRepository) {
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @PutMapping("/api/users/{email}")
     fun update(@PathVariable @Email email: String, @RequestBody @Valid user: UserDTO): ResponseEntity<Any> {
+        logger.info("Mise à jour de l'utilisateur d'email $email par l'utilisateur : $user")
         return ResponseEntity.ok(userRepository.updateUser(email, user))
     }
 
@@ -84,6 +87,7 @@ class UserController(val userRepository: UserDatabaseRepository) {
     ])
     @DeleteMapping("/api/users/{email}")
     fun delete(@PathVariable @Email email: String): ResponseEntity<Any> {
+        logger.info("Eliminar un usuario de correo electrónico $email")
         userRepository.deleteUser(email)
         return ResponseEntity.ok().build()
     }
