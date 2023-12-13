@@ -1,27 +1,19 @@
-package com.example.printempsdemarrage.dto
+package com.example.printempsdemarrage.entity
 
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToMany
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
-import jakarta.validation.constraints.NotBlank
-import java.util.*
+import com.example.printempsdemarrage.dto.ArticlePanierDTO
+import com.example.printempsdemarrage.dto.UserPanierDTO
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "Panier")
 data class PanierDTO (
         @Id
-        var id : Int
-        /*
+        var id : Int,
+
         @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL])
-        var user: UserDTO,
+        var user: UserPanierDTO,
+
         @OneToMany(cascade = [CascadeType.ALL])
         @JoinColumn(referencedColumnName = "panier")
-        var articles: List<ArticleDTO> = emptyList()
-         */
+        var articles: List<ArticlePanierDTO> = emptyList()
 )

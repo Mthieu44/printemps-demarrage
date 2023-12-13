@@ -1,6 +1,6 @@
 package com.example.printempsdemarrage.controller
 
-import com.example.printempsdemarrage.dto.PanierDTO
+import com.example.printempsdemarrage.entity.PanierDTO
 import com.example.printempsdemarrage.jpa.PanierDatabaseRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
