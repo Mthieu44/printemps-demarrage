@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.*
 
 @RestController
@@ -95,7 +96,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
     @PutMapping("/api/articles/{id}/stock/{quantity}")
     fun updateStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
         val article = articleRepository.getArticle(id)
-        val art = ArticleDTO(article.id, article.name, article.price, quantity, Date())
+        val art = ArticleDTO(article.id, article.name, article.price, quantity, article.lastUpdate)
         return ResponseEntity.ok(articleRepository.updateArticle(id, art))
     }
 }
