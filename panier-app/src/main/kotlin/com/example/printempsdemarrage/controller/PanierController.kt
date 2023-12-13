@@ -46,16 +46,21 @@ class PanierController(val panierRepository: PanierRepoInterface) {
             if (userResponse.statusCode.isError) {
                 throw HttpClientErrorException(userResponse.statusCode)
             }
+            logger.debug("User with Email $userEmail exists.")
         } catch (e: HttpClientErrorException.NotFound) {
+            logger.error("User with Email $userEmail not found.")
             throw RuntimeException("User with Email $userEmail not found.")
         } catch (e: Exception) {
+            logger.error("Error checking user existence: ${e.message}")
             throw RuntimeException("Error checking user existence: ${e.message}")
         }
 
         // Vérifier si l'utilisateur est déjà attribué à un panier
         if (panierRepository.getPaniers().any { it.user == panier.user }) {
+            logger.error("User with Email $userEmail is already assigned to a panier.")
             throw PanierAlreadyExistsException("User with Email $userEmail is already assigned to a panier.")
         }
+        logger.info("Tout s'est bien passé, creating panier with ID ${panier.id}.")
         return ResponseEntity.ok(panierRepository.addPanier(panier))
     }
 
@@ -70,6 +75,7 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @Tag(name = "Administration")
     @GetMapping("/api/paniers")
     fun getAll(): ResponseEntity<List<PanierDTO>> {
+        logger.info("Affichage de tous les paniers.")
         return ResponseEntity.ok(panierRepository.getPaniers())
     }
 
@@ -84,6 +90,7 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @Tag(name = "Administration")
     @GetMapping("/api/paniers/{id}")
     fun findById(@PathVariable id: String): ResponseEntity<PanierDTO> {
+        logger.info("Ver cesta por ID $id")
         return ResponseEntity.ok(panierRepository.getPanier(id))
     }
 
@@ -98,6 +105,7 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @Tag(name = "Administration")
     @PutMapping("/api/paniers/{id}")
     fun update(@PathVariable id: String, @RequestBody @Valid panier: PanierDTO): ResponseEntity<Any> {
+        logger.info("Mise à jour du panier d'ID $id par le nouveau panier $panier.")
         return ResponseEntity.ok(panierRepository.updatePanier(id, panier))
     }
 
@@ -110,6 +118,7 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @Tag(name = "Administration")
     @DeleteMapping("/api/paniers/{id}")
     fun delete(@PathVariable id: String): ResponseEntity<Any> {
+        logger.info("¿Suprimir la cesta de identificación $id?")
         panierRepository.deletePanier(id)
         return ResponseEntity.ok().build()
     }
@@ -126,8 +135,10 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     fun addArticle(@PathVariable id: String, @RequestBody @Valid article: ArticleInPanierDTO): ResponseEntity<PanierDTO> {
         val articleResponse = RestTemplate().getForEntity("http://localhost:8081/api/articles/${article.id}/stock/remove/${article.quantity}", String::class.java)
         if (articleResponse.statusCode.isError) {
+            logger.error("No se ha podido retirar el artículo del almacén. Código de estado: ${articleResponse.statusCode}")
             throw HttpClientErrorException(articleResponse.statusCode)
         }
+        logger.info("Adding article with ID ${article.id} to panier with ID $id.")
         return ResponseEntity.ok(panierRepository.addToPanier(id, article))
     }
 
@@ -143,8 +154,10 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     fun removeArticle(@PathVariable id: String, @RequestBody @Valid article: ArticleInPanierDTO): ResponseEntity<PanierDTO> {
         val articleResponse = RestTemplate().getForEntity("http://localhost:8081/api/articles/${article.id}/stock/add/${article.quantity}", String::class.java)
         if (articleResponse.statusCode.isError) {
+            logger.error("Failed to add article back to stock. Status code: ${articleResponse.statusCode}")
             throw HttpClientErrorException(articleResponse.statusCode)
         }
+        logger.info("Removing article with ID ${article.id} from panier with ID $id.")
         return ResponseEntity.ok(panierRepository.removeFromPanier(id, article))
     }
 }
