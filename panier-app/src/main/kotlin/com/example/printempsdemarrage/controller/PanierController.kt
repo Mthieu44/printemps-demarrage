@@ -221,8 +221,9 @@ class PanierController(val panierRepository: PanierRepoInterface) {
             RestTemplate().put("http://localhost:8080/api/users/${panier?.userEmail}", user)
         } catch (e: Exception) {
             logger.error("Error updating user: ${e.message}")
-            return ResponseEntity.status(400).body("Error updating user: ${e.message}")
+            ResponseEntity.status(400).body("Error updating user: ${e.message}")
         }
+        panier?.articles?.clear()
         return ResponseEntity.ok(panier)
     }
 }
