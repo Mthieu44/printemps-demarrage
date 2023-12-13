@@ -2,6 +2,7 @@ package com.example.printempsdemarrage.controller
 
 import com.example.printempsdemarrage.exception.ArticleAlreadyExistsException
 import com.example.printempsdemarrage.exception.ArticleNotFoundException
+import com.example.printempsdemarrage.exception.ArticleStockException
 import jakarta.validation.ConstraintViolationException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
@@ -45,6 +46,14 @@ class HttpErrorHandler : ResponseEntityExceptionHandler() {
             request: WebRequest
     ): ResponseEntity<Any> {
         return ResponseEntity.status(409).body("cc je suis erreur article already exists exception")
+    }
+
+    @ExceptionHandler(ArticleStockException::class)
+    fun handleArticleStockException(
+            ex: ArticleStockException,
+            request: WebRequest
+    ): ResponseEntity<Any> {
+        return ResponseEntity.status(409).body("cc je suis erreur article stock exception")
     }
 
 }

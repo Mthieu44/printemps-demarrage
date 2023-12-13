@@ -3,6 +3,7 @@ package com.example.printempsdemarrage.jpa
 import com.example.printempsdemarrage.dto.ArticleDTO
 import com.example.printempsdemarrage.exception.ArticleAlreadyExistsException
 import com.example.printempsdemarrage.exception.ArticleNotFoundException
+import com.example.printempsdemarrage.exception.ArticleStockException
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -26,6 +27,9 @@ class ArticleDatabaseRepository(private val jpaRepo: JpaRepo) {
     fun updateArticle(id: String, article: ArticleDTO): ArticleDTO {
         if (!jpaRepo.existsById(id)) {
             throw ArticleNotFoundException("User with email $id does not exist")
+        }
+        if (article.quantity < 0){
+            throw ArticleStockException("Article stock can't be negative")
         }
         return jpaRepo.save(article)
     }
