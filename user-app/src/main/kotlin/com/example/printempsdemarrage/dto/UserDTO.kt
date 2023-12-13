@@ -13,11 +13,11 @@ import java.util.Date
 @Table(name = "UserTable")
 data class UserDTO (
     @field:NotBlank @Id
-    val email: String = "",
+    val email: String,
     @field:Size(min = 2, max = 20)
-    val nom: String = "",
+    val nom: String,
     @field:Size(min = 2, max = 80)
-    val address: String = "",
-    val subbed: Boolean = false,
-    val lastCommand: Date = Date(),
+    val address: String,
+    val subbed: Boolean,
+    val lastCommand: Date,
 )

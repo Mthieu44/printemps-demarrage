@@ -12,5 +12,7 @@ data class PanierDTO (
         @NotBlank
         var user: String,
 
-        var articles: MutableList<Pair<Int, Int>>
+        @OneToMany(cascade = [CascadeType.ALL])
+        @JoinColumn(referencedColumnName = "id")
+        var articles: MutableList<ArticleInPanierDTO>
 )

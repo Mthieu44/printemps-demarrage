@@ -14,13 +14,13 @@ import java.util.*
 @Table(name = "Articles")
 data class ArticleDTO (
         @field:Id
-        val id: Int = 0,
+        val id: Int,
         @field:NotBlank
-        val name: String = "",
+        val name: String,
         @field:Min(0)
-        val price: Double = 0.0,
+        val price: Double,
         @field:Min(0)
-        val quantity: Int = 0,
-        val lastUpdate: LocalDate = LocalDate.now(),
+        val quantity: Int,
+        val lastUpdate: LocalDate,
         /*val panier: PanierDTO*/
 )
