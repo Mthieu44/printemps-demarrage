@@ -1,8 +1,7 @@
-package com.example.printempsdemarrage.entity
+package com.example.printempsdemarrage.dto
 
-import com.example.printempsdemarrage.dto.ArticlePanierDTO
-import com.example.printempsdemarrage.dto.UserPanierDTO
 import jakarta.persistence.*
+import jakarta.validation.constraints.NotBlank
 
 @Entity
 @Table(name = "Panier")
@@ -10,10 +9,8 @@ data class PanierDTO (
         @Id
         var id : Int,
 
-        @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL])
-        var user: UserPanierDTO,
+        @NotBlank
+        var user: String,
 
-        @OneToMany(cascade = [CascadeType.ALL])
-        @JoinColumn(referencedColumnName = "panier")
-        var articles: List<ArticlePanierDTO> = emptyList()
+        var articles: MutableList<Pair<Int, Int>>
 )

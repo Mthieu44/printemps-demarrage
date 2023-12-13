@@ -1,6 +1,7 @@
 package com.example.printempsdemarrage.controller
 
-import com.example.printempsdemarrage.entity.PanierDTO
+import com.example.printempsdemarrage.dto.PanierDTO
+import com.example.printempsdemarrage.exception.PanierAlreadyExistsException
 import com.example.printempsdemarrage.jpa.PanierDatabaseRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -8,19 +9,20 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import jakarta.persistence.Id
 import jakarta.validation.Valid
-import jakarta.validation.constraints.Email
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestTemplate
 
 @RestController
 @Validated
 class PanierController(val panierRepository: PanierDatabaseRepository) {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val userControllerUrl = "http://localhost:8080/api/users"
 
 
     @Operation(summary = "Create panier")
@@ -33,6 +35,22 @@ class PanierController(val panierRepository: PanierDatabaseRepository) {
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @PostMapping("/api/paniers")
     fun create(@RequestBody @Valid panier: PanierDTO): ResponseEntity<PanierDTO> {
+        val userEmail = panier.user
+        try {
+            val userResponse = RestTemplate().getForEntity("$userControllerUrl/$userEmail", String::class.java)
+            if (userResponse.statusCode.isError) {
+                throw HttpClientErrorException(userResponse.statusCode)
+            }
+        } catch (e: HttpClientErrorException.NotFound) {
+            throw RuntimeException("User with Email $userEmail not found.")
+        } catch (e: Exception) {
+            throw RuntimeException("Error checking user existence: ${e.message}")
+        }
+
+        // Vérifier si l'utilisateur est déjà attribué à un panier
+        if (panierRepository.getPaniers().any { it.user == panier.user }) {
+            throw PanierAlreadyExistsException("User with Email $userEmail is already assigned to a panier.")
+        }
         return ResponseEntity.ok(panierRepository.addPanier(panier))
     }
 
