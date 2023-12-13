@@ -7,6 +7,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
+import java.time.LocalDate
 import java.util.*
 
 @Entity
@@ -20,6 +21,6 @@ data class ArticleDTO (
         val price: Double = 0.0,
         @field:Min(0)
         val quantity: Int = 0,
-        val lastUpdate: Date = Date(),
+        val lastUpdate: LocalDate = LocalDate.now(),
         /*val panier: PanierDTO*/
 )
