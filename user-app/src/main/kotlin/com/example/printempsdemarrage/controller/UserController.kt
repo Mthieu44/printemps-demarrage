@@ -60,6 +60,7 @@ class UserController(val userRepository: UserDatabaseRepository) {
     ])
     @GetMapping("/api/users/{email}")
     fun findOne(@PathVariable @Email email: String): ResponseEntity<UserDTO> {
+
         return ResponseEntity.ok(userRepository.getUser(email))
     }
 
