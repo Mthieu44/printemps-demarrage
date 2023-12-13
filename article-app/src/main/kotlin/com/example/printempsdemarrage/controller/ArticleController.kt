@@ -72,7 +72,9 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
             content = [Content(mediaType = "application/json",
                 schema = Schema(implementation = ArticleDTO::class))]),
         ApiResponse(responseCode = "400", description = "Invalid request",
-            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))]),
+        ApiResponse(responseCode = "409", description = "Article stock can't be negative",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @Tag(name = "Administration")
     @PutMapping("/api/articles/{id}")
     fun update(@PathVariable id: String, @RequestBody @Valid article: ArticleDTO): ResponseEntity<Any> {
@@ -92,13 +94,32 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
         return ResponseEntity.ok().build()
     }
 
+    @Operation(summary = "Remove stock article by id")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Article stock updated",
+            content = [Content(mediaType = "application/json",
+                schema = Schema(implementation = ArticleDTO::class))]),
+        ApiResponse(responseCode = "400", description = "Invalid request",
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))]),
+        ApiResponse(responseCode = "409", description = "Article stock can't be negative",
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+    @Tag(name = "Métier")
+    @PutMapping("/api/articles/{id}/stock/remove/{quantity}")
+    fun removeStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
+        val article = articleRepository.getArticle(id)
+        val art = ArticleDTO(article.id, article.name, article.price, article.quantity - quantity, article.lastUpdate)
+        return ResponseEntity.ok(articleRepository.updateArticle(id, art))
+    }
+
     @Operation(summary = "Set stock article by id")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Article stock updated",
             content = [Content(mediaType = "application/json",
                 schema = Schema(implementation = ArticleDTO::class))]),
         ApiResponse(responseCode = "400", description = "Invalid request",
-            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+            content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))]),
+        ApiResponse(responseCode = "409", description = "Article stock can't be negative",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @Tag(name = "Métier")
     @PutMapping("/api/articles/{id}/stock/{quantity}")
     fun updateStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {

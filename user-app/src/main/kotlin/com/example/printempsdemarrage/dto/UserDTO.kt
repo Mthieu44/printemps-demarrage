@@ -20,7 +20,4 @@ data class UserDTO (
     val address: String = "",
     val subbed: Boolean = false,
     val lastCommand: Date = Date(),
-    /*
-    @OneToOne
-    val panier : PanierDTO*/
 )
