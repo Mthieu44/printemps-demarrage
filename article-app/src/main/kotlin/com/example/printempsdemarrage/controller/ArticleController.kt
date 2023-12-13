@@ -109,7 +109,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
         ApiResponse(responseCode = "409", description = "Article stock can't be negative",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @Tag(name = "Métier")
-    @PutMapping("/api/articles/{id}/stock/remove/{quantity}")
+    @GetMapping("/api/articles/{id}/stock/remove/{quantity}")
     fun removeStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
         logger.info("Suppression d'une quantité de $quantity au stock de l'article d'ID : $id")
         val article = articleRepository.getArticle(id)
@@ -127,7 +127,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
         ApiResponse(responseCode = "409", description = "Article stock can't be negative",
                 content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
     @Tag(name = "Métier")
-    @PutMapping("/api/articles/{id}/stock/add/{quantity}")
+    @GetMapping("/api/articles/{id}/stock/add/{quantity}")
     fun addStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
         logger.info("Ajout d'une quantité de $quantity au stock de l'article d'ID : $id")
         val article = articleRepository.getArticle(id)

@@ -7,10 +7,10 @@ import jakarta.validation.constraints.NotBlank
 @Table(name = "Panier")
 data class PanierDTO (
         @Id
-        var id : Int,
+        var id : String,
 
         @NotBlank
-        var user: String,
+        var userEmail: String,
 
         @OneToMany(cascade = [CascadeType.ALL])
         @JoinColumn(referencedColumnName = "id")

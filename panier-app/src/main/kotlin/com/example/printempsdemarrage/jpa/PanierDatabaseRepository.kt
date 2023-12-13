@@ -15,6 +15,7 @@ class PanierDatabaseRepository(private val jpaRepo: JpaRepo) : PanierRepoInterfa
 
 
     override fun getPaniers(): List<PanierDTO>{
+        println("======================================================================================")
         return jpaRepo.findAll()
     }
 
@@ -26,7 +27,7 @@ class PanierDatabaseRepository(private val jpaRepo: JpaRepo) : PanierRepoInterfa
 
 
     override fun addPanier(panier: PanierDTO): PanierDTO {
-        if (jpaRepo.existsById(panier.id.toString())) {
+        if (jpaRepo.existsById(panier.id)) {
             throw PanierAlreadyExistsException("Panier with id ${panier.id} already exists")
         }
         return jpaRepo.save(panier)
@@ -76,8 +77,11 @@ class PanierDatabaseRepository(private val jpaRepo: JpaRepo) : PanierRepoInterfa
                 } else {
                     panierDTO.articles[index] = newArticle
                 }
+                return jpaRepo.save(panierDTO)
+            } else {
+                throw PanierNotFoundException("Article with id ${article.id} does not exist in panier with id $id")
             }
-            return jpaRepo.save(panierDTO)
+
         } else {
             throw PanierNotFoundException("Panier with id $id does not exist")
         }

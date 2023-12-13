@@ -40,7 +40,7 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @Tag(name = "Administration")
     @PostMapping("/api/paniers")
     fun create(@RequestBody @Valid panier: PanierDTO): ResponseEntity<PanierDTO> {
-        val userEmail = panier.user
+        val userEmail = panier.userEmail
         try {
             val userResponse = RestTemplate().getForEntity("$userControllerUrl/$userEmail", String::class.java)
             if (userResponse.statusCode.isError) {
@@ -56,7 +56,8 @@ class PanierController(val panierRepository: PanierRepoInterface) {
         }
 
         // Vérifier si l'utilisateur est déjà attribué à un panier
-        if (panierRepository.getPaniers().any { it.user == panier.user }) {
+        println(panierRepository.getPaniers())
+        if (panierRepository.getPaniers().any { it.userEmail == panier.userEmail }) {
             logger.error("User with Email $userEmail is already assigned to a panier.")
             throw PanierAlreadyExistsException("User with Email $userEmail is already assigned to a panier.")
         }
