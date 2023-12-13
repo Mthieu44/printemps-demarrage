@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -44,15 +46,28 @@ class PanierController(val panierRepository: PanierRepoInterface) {
         try {
             val userResponse = RestTemplate().getForEntity("$userControllerUrl/$userEmail", String::class.java)
             if (userResponse.statusCode.isError) {
-                throw HttpClientErrorException(userResponse.statusCode)
+                when (userResponse.statusCode.value()){
+                    400 -> {
+                        logger.error("Champs incorrects")
+                        ResponseEntity.status(404).body("cc je suis champs incorrects")
+                    }
+                    404 -> {
+                        logger.error("User not found")
+                        ResponseEntity.status(404).body("cc je suis erreur user not found")
+                    }
+                    409 -> {
+                        logger.error("User already exists")
+                        ResponseEntity.status(409).body("cc je suis erreur panier already exists exception")
+                    }
+                    else -> {
+                        throw HttpClientErrorException(userResponse.statusCode)
+                    }
+                }
             }
             logger.debug("User with Email $userEmail exists.")
-        } catch (e: HttpClientErrorException.NotFound) {
-            logger.error("User with Email $userEmail not found.")
-            throw RuntimeException("User with Email $userEmail not found.")
         } catch (e: Exception) {
             logger.error("Error checking user existence: ${e.message}")
-            throw RuntimeException("Error checking user existence: ${e.message}")
+            ResponseEntity.status(400).body("cc erreur inconnue")
         }
 
         // Vérifier si l'utilisateur est déjà attribué à un panier
@@ -135,9 +150,20 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @PostMapping("/api/paniers/{id}/article")
     fun addArticle(@PathVariable id: String, @RequestBody @Valid article: ArticleInPanierDTO): ResponseEntity<PanierDTO> {
         val articleResponse = RestTemplate().getForEntity("http://localhost:8081/api/articles/${article.id}/stock/remove/${article.quantity}", String::class.java)
-        if (articleResponse.statusCode.isError) {
-            logger.error("No se ha podido retirar el artículo del almacén. Código de estado: ${articleResponse.statusCode}")
-            throw HttpClientErrorException(articleResponse.statusCode)
+        if (articleResponse.statusCode.isError){
+            when (articleResponse.statusCode.value()){
+                404 -> {
+                    logger.error("Article not found")
+                    ResponseEntity.status(404).body("cc je suis erreur article not found")
+                }
+                409 -> {
+                    logger.error("Article already exists")
+                    ResponseEntity.status(409).body("cc je suis erreur article already exists exception")
+                }
+                else -> {
+                    throw HttpClientErrorException(articleResponse.statusCode)
+                }
+            }
         }
         logger.info("Adding article with ID ${article.id} to panier with ID $id.")
         return ResponseEntity.ok(panierRepository.addToPanier(id, article))
@@ -154,9 +180,20 @@ class PanierController(val panierRepository: PanierRepoInterface) {
     @DeleteMapping("/api/paniers/{id}/article")
     fun removeArticle(@PathVariable id: String, @RequestBody @Valid article: ArticleInPanierDTO): ResponseEntity<PanierDTO> {
         val articleResponse = RestTemplate().getForEntity("http://localhost:8081/api/articles/${article.id}/stock/add/${article.quantity}", String::class.java)
-        if (articleResponse.statusCode.isError) {
-            logger.error("Failed to add article back to stock. Status code: ${articleResponse.statusCode}")
-            throw HttpClientErrorException(articleResponse.statusCode)
+        if (articleResponse.statusCode.isError){
+            when (articleResponse.statusCode.value()){
+                404 -> {
+                    logger.error("Article not found")
+                    ResponseEntity.status(404).body("cc je suis erreur article not found")
+                }
+                409 -> {
+                    logger.error("Article already exists")
+                    ResponseEntity.status(409).body("cc je suis erreur article already exists exception")
+                }
+                else -> {
+                    throw HttpClientErrorException(articleResponse.statusCode)
+                }
+            }
         }
         logger.info("Removing article with ID ${article.id} from panier with ID $id.")
         return ResponseEntity.ok(panierRepository.removeFromPanier(id, article))
