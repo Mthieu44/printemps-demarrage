@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -29,6 +30,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
             )]),
         ApiResponse(responseCode = "409", description = "article already exist",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+    @Tag(name = "Administration")
     @PostMapping("/api/articles")
     fun create(@RequestBody @Valid article: ArticleDTO): ResponseEntity<ArticleDTO> {
         return ResponseEntity.ok(articleRepository.addArticle(article))
@@ -42,6 +44,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
                 array = ArraySchema(
                     schema = Schema(implementation = ArticleDTO::class))
             )])])
+    @Tag(name = "Administration")
     @GetMapping("/api/articles")
     fun getAll(): ResponseEntity<List<ArticleDTO>> {
         return ResponseEntity.ok(articleRepository.getArticles())
@@ -56,6 +59,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
                     schema = Schema(implementation = ArticleDTO::class))]),
         ApiResponse(responseCode = "404", description = "Article not found")
     ])
+    @Tag(name = "Administration")
     @GetMapping("/api/articles/{id}")
     fun findOne(@PathVariable id: String): ResponseEntity<ArticleDTO> {
         return ResponseEntity.ok(articleRepository.getArticle(id))
@@ -68,6 +72,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
                 schema = Schema(implementation = ArticleDTO::class))]),
         ApiResponse(responseCode = "400", description = "Invalid request",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+    @Tag(name = "Administration")
     @PutMapping("/api/articles/{id}")
     fun update(@PathVariable id: String, @RequestBody @Valid article: ArticleDTO): ResponseEntity<Any> {
         return ResponseEntity.ok(articleRepository.updateArticle(id, article))
@@ -79,6 +84,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
         ApiResponse(responseCode = "404", description = "Article not found",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])
     ])
+    @Tag(name = "Administration")
     @DeleteMapping("/api/articles/{id}")
     fun delete(@PathVariable id: String): ResponseEntity<Any> {
         articleRepository.deleteArticle(id)
@@ -92,6 +98,7 @@ class ArticleController(val articleRepository: ArticleDatabaseRepository) {
                 schema = Schema(implementation = ArticleDTO::class))]),
         ApiResponse(responseCode = "400", description = "Invalid request",
             content = [Content(mediaType = "application/json", schema = Schema(implementation = String::class))])])
+    @Tag(name = "Métier")
     @PutMapping("/api/articles/{id}/stock/{quantity}")
     fun updateStock(@PathVariable id: String, @PathVariable quantity: Int): ResponseEntity<Any> {
         val article = articleRepository.getArticle(id)
