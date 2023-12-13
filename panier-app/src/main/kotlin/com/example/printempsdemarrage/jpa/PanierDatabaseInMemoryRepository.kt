@@ -5,92 +5,91 @@ import com.example.printempsdemarrage.dto.PanierDTO
 import com.example.printempsdemarrage.dto.PanierRepoInterface
 import com.example.printempsdemarrage.exception.PanierAlreadyExistsException
 import com.example.printempsdemarrage.exception.PanierNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Example
 import org.springframework.stereotype.Repository
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 //@Repository
-class PanierDatabaseRepository(private val jpaRepo: JpaRepo) : PanierRepoInterface {
+class PanierDatabaseInMemoryRepository : PanierRepoInterface {
 
-
+    private val map = mutableMapOf<String, PanierDTO>()
+    private val logger = LoggerFactory.getLogger(javaClass)
     override fun getPaniers(): List<PanierDTO>{
-        println("======================================================================================")
-        return jpaRepo.findAll()
+            return map.values.toList()
     }
 
     override fun getPanier(id: String): PanierDTO? {
-        val panier = jpaRepo.findById(id)
-        return if (panier.isPresent) panier.get() else throw PanierNotFoundException("Panier with id $id not found")
+        return map[id]
     }
 
 
 
     override fun addPanier(panier: PanierDTO): PanierDTO {
-        if (jpaRepo.existsById(panier.id)) {
+        logger.debug("=====> debug")
+        val previous = map.putIfAbsent(panier.id, panier)
+        if (previous != null) {
             throw PanierAlreadyExistsException("Panier with id ${panier.id} already exists")
+        } else {
+            return panier
         }
-        return jpaRepo.save(panier)
     }
 
     override fun updatePanier(id: String, panier: PanierDTO): PanierDTO {
-        if (!jpaRepo.existsById(id)) {
+        logger.debug("=====> debug")
+        val updated = map.replace(id, panier)
+        if (updated != null) {
             throw PanierNotFoundException("Panier with id $id does not exist")
+        } else {
+            return panier
         }
-        return jpaRepo.save(panier)
     }
 
 
     override fun deletePanier(id: String) {
-        if (!jpaRepo.existsById(id)) {
-            throw PanierNotFoundException("Panier with id $id does not exist")
-        }
-        jpaRepo.deleteById(id)
+        map.remove(id)
     }
 
     override fun addToPanier(id: String, article: ArticleInPanierDTO): PanierDTO {
-        val panier = jpaRepo.findById(id)
-        if (panier.isPresent) {
-            val panierDTO = panier.get()
-            val index = panierDTO.articles.indexOf(article)
+
+        val panier = map[id]
+        if (panier != null) {
+            val index = panier.articles.indexOf(article)
             if (index != -1) {
-                val newArticle = ArticleInPanierDTO(article.id, panierDTO.articles[index].quantity + article.quantity)
-                panierDTO.articles[index] = newArticle
+                val newArticle = ArticleInPanierDTO(article.id, panier.articles[index].quantity + article.quantity)
+                panier.articles[index] = newArticle
             } else {
-                panierDTO.articles.add(article)
+                panier.articles.add(article)
             }
-            return jpaRepo.save(panierDTO)
+            return panier
         } else {
             throw PanierNotFoundException("Panier with id $id does not exist")
         }
     }
 
     override fun removeFromPanier(id: String, article: ArticleInPanierDTO): PanierDTO {
-        val panier = jpaRepo.findById(id)
-        if (panier.isPresent) {
-            val panierDTO = panier.get()
-            val index = panierDTO.articles.indexOf(article)
+        val panier = map[id]
+        if (panier != null) {
+            val index = panier.articles.indexOf(article)
             if (index != -1) {
-                val newArticle = ArticleInPanierDTO(article.id, panierDTO.articles[index].quantity - article.quantity)
+                val newArticle = ArticleInPanierDTO(article.id, panier.articles[index].quantity - article.quantity)
                 if (newArticle.quantity <= 0) {
-                    panierDTO.articles.removeAt(index)
+                    panier.articles.removeAt(index)
                 } else {
-                    panierDTO.articles[index] = newArticle
+                    panier.articles[index] = newArticle
                 }
-                return jpaRepo.save(panierDTO)
-            } else {
-                throw PanierNotFoundException("Article with id ${article.id} does not exist in panier with id $id")
             }
-
+            return panier
         } else {
             throw PanierNotFoundException("Panier with id $id does not exist")
         }
     }
 
     override fun getArticles(id: String): List<ArticleInPanierDTO> {
-        val panier = jpaRepo.findById(id)
-        if (panier.isPresent) {
-            return panier.get().articles
+        val panier = map[id]
+        if (panier != null) {
+            return panier.articles
         } else {
             throw PanierNotFoundException("Panier with id $id does not exist")
         }
